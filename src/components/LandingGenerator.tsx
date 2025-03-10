@@ -14,6 +14,7 @@ const LandingGenerator = () => {
   const [city, setCity] = useState('');
   const [state, setState] = useState('');
   const [tone, setTone] = useState('professional');
+  const [companyName, setCompanyName] = useState('');
   const [isApiKeySet, setIsApiKeySet] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedContent, setGeneratedContent] = useState<any>(null);
@@ -51,7 +52,8 @@ const LandingGenerator = () => {
         keywords,
         city,
         state,
-        tone
+        tone,
+        companyName
       });
       
       setGeneratedContent(content);
@@ -78,13 +80,14 @@ const LandingGenerator = () => {
     setKeywords([]);
     setCity('');
     setState('');
+    setCompanyName('');
     setError(null);
   };
 
   const handleDownloadText = () => {
     if (!generatedContent) return;
     
-    const textContent = generateTextFile(generatedContent, city, state, keywords);
+    const textContent = generateTextFile(generatedContent, city, state, keywords, companyName);
     const filename = `${city}-${state}-${keywords[0]}.txt`.toLowerCase().replace(/\s+/g, '-');
     downloadFile(textContent, filename);
     
@@ -97,7 +100,7 @@ const LandingGenerator = () => {
   const handleDownloadHTML = () => {
     if (!generatedContent) return;
     
-    const htmlContent = generateHtmlFile(generatedContent, city, state, keywords);
+    const htmlContent = generateHtmlFile(generatedContent, city, state, keywords, companyName);
     const filename = `${city}-${state}-${keywords[0]}.html`.toLowerCase().replace(/\s+/g, '-');
     downloadFile(htmlContent, filename);
     
@@ -116,6 +119,7 @@ const LandingGenerator = () => {
       state,
       keywords,
       tone,
+      companyName,
       createdAt: new Date(),
       content: generatedContent
     };
@@ -138,6 +142,7 @@ const LandingGenerator = () => {
           city={city}
           state={state}
           keywords={keywords}
+          companyName={companyName}
           onReset={handleReset}
           onDownloadText={handleDownloadText}
           onDownloadHTML={handleDownloadHTML}
@@ -155,6 +160,8 @@ const LandingGenerator = () => {
           setState={setState}
           tone={tone}
           setTone={setTone}
+          companyName={companyName}
+          setCompanyName={setCompanyName}
           error={error}
           isGenerating={isGenerating}
           onGenerate={handleGenerate}

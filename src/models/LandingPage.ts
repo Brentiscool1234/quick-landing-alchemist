@@ -5,6 +5,7 @@ export interface LandingPage {
   state: string;
   keywords: string[];
   tone: string;
+  companyName: string;
   createdAt: Date;
   content: {
     introduction: string;

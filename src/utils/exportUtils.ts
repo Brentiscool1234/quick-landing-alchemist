@@ -1,15 +1,16 @@
 
-export function generateTextFile(content: any, city: string, state: string, keywords: string[]): string {
+export function generateTextFile(content: any, city: string, state: string, keywords: string[], companyName?: string): string {
   const keywordsText = keywords.join(', ');
+  const businessName = companyName || 'Our Business';
   
-  return `# ${keywords[0]} Services in ${city}, ${state}
+  return `# ${keywords[0]} Services in ${city}, ${state} | ${businessName}
 
 Keywords: ${keywordsText}
 
 ## Introduction
 ${content.introduction}
 
-## Why Choose Us
+## Why Choose ${businessName}
 ${content.whyUs}
 
 ## Things to Do in ${city}, ${state}
@@ -19,14 +20,15 @@ ${content.thingsToDo}
 
 ${content.faq.map((item: any) => `### ${item.question}\n${item.answer}\n`).join('\n')}
 
-Ready to Get Started? Contact us today to discuss your ${keywordsText} needs in ${city}, ${state}.
+Ready to Get Started? Contact ${businessName} today to discuss your ${keywordsText} needs in ${city}, ${state}.
 `;
 }
 
-export function generateHtmlFile(content: any, city: string, state: string, keywords: string[]): string {
+export function generateHtmlFile(content: any, city: string, state: string, keywords: string[], companyName?: string): string {
   const keywordsText = keywords.join(', ');
   const keywordsMeta = keywords.join(', ');
-  const title = `${keywords[0]} Services in ${city}, ${state}`;
+  const businessName = companyName || 'Our Business';
+  const title = `${keywords[0]} Services in ${city}, ${state} | ${businessName}`;
   
   return `<!DOCTYPE html>
 <html lang="en">
@@ -49,7 +51,7 @@ export function generateHtmlFile(content: any, city: string, state: string, keyw
   {
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
-    "name": "${keywords[0]} Services",
+    "name": "${businessName}",
     "description": "${content.introduction.substring(0, 155)}",
     "address": {
       "@type": "PostalAddress",
@@ -114,7 +116,7 @@ export function generateHtmlFile(content: any, city: string, state: string, keyw
   </section>
   
   <section id="why-us">
-    <h2>Why Choose Us</h2>
+    <h2>Why Choose ${businessName}</h2>
     <p>${content.whyUs}</p>
   </section>
   
@@ -135,11 +137,11 @@ export function generateHtmlFile(content: any, city: string, state: string, keyw
   
   <section id="cta" class="cta">
     <h2>Ready to Get Started?</h2>
-    <p>Contact us today to discuss your ${keywordsText} needs in ${city}, ${state}.</p>
+    <p>Contact ${businessName} today to discuss your ${keywordsText} needs in ${city}, ${state}.</p>
   </section>
   
   <footer>
-    <p>© ${new Date().getFullYear()} ${keywords[0]} Services. All rights reserved.</p>
+    <p>© ${new Date().getFullYear()} ${businessName}. All rights reserved.</p>
   </footer>
 </body>
 </html>`;

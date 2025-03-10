@@ -18,6 +18,8 @@ interface GeneratorFormProps {
   setState: React.Dispatch<React.SetStateAction<string>>;
   tone: string;
   setTone: React.Dispatch<React.SetStateAction<string>>;
+  companyName: string;
+  setCompanyName: React.Dispatch<React.SetStateAction<string>>;
   error: string | null;
   isGenerating: boolean;
   onGenerate: () => void;
@@ -34,6 +36,8 @@ const GeneratorForm: React.FC<GeneratorFormProps> = ({
   setState,
   tone,
   setTone,
+  companyName,
+  setCompanyName,
   error,
   isGenerating,
   onGenerate
@@ -48,6 +52,19 @@ const GeneratorForm: React.FC<GeneratorFormProps> = ({
       </div>
       
       <ApiKeyInput onApiKeySet={setIsApiKeySet} />
+      
+      <div className="space-y-2">
+        <label className="block text-sm font-medium">
+          Company Name
+        </label>
+        <input
+          type="text"
+          value={companyName}
+          onChange={(e) => setCompanyName(e.target.value)}
+          placeholder="Enter your company name"
+          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+        />
+      </div>
       
       <KeywordInput keywords={keywords} setKeywords={setKeywords} />
       
