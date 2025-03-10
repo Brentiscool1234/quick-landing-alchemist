@@ -3,6 +3,7 @@ interface GenerationParams {
   keywords: string[];
   city: string;
   state: string;
+  tone?: string;
 }
 
 interface GeneratedContent {
@@ -15,12 +16,106 @@ interface GeneratedContent {
   }[];
 }
 
-// Mock data generator function - in a real app, this would call the OpenAI API
+let openaiApiKey = '';
+
+export const setOpenAIApiKey = (apiKey: string) => {
+  openaiApiKey = apiKey;
+};
+
+export const getOpenAIApiKey = () => {
+  return openaiApiKey;
+};
+
 export async function generateLandingContent(params: GenerationParams): Promise<GeneratedContent> {
+  const { keywords, city, state, tone = 'professional' } = params;
+  
+  if (!openaiApiKey) {
+    throw new Error('OpenAI API key is not set. Please provide your API key.');
+  }
+  
+  console.log("Generating content with params:", params);
+  
+  const prompt = `Create SEO-optimized landing page content for a local business in ${city}, ${state} focused on ${keywords.join(", ")}.
+  The content should be text-only and optimized for local SEO, with natural placement of location keywords and service keywords.
+  
+  Use a ${tone} tone throughout the content.
+  
+  Include the following sections:
+  1. Introduction (emphasize local service in ${city}, ${state})
+  2. Why Us section (highlight local expertise and benefits specific to ${city})
+  3. Things to do in ${city}, ${state} section (provide useful local information)
+  4. FAQ section (4 questions and answers, all with local relevance)
+  
+  For each section, naturally include:
+  - The main keyword "${keywords[0]}" multiple times
+  - Secondary keywords: ${keywords.slice(1).join(", ")}
+  - Location terms: "${city}", "${state}", and related local areas
+  - Natural variations of these terms
+  
+  Format the response as JSON with the following structure:
+  {
+    "introduction": "...",
+    "whyUs": "...",
+    "thingsToDo": "...",
+    "faq": [
+      {
+        "question": "...",
+        "answer": "..."
+      },
+      ...
+    ]
+  }`;
+  
+  try {
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${openaiApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: "gpt-4o",
+        messages: [
+          {
+            role: "system",
+            content: "You are a local SEO expert specializing in creating compelling, location-specific landing page content that ranks well in local search results."
+          },
+          {
+            role: "user",
+            content: prompt
+          }
+        ],
+        temperature: 0.7,
+        response_format: { type: "json_object" }
+      }),
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(`OpenAI API Error: ${errorData.error?.message || 'Unknown error'}`);
+    }
+    
+    const data = await response.json();
+    
+    // Parse the response
+    try {
+      const content = JSON.parse(data.choices[0].message.content || "{}");
+      return content as GeneratedContent;
+    } catch (parseError) {
+      console.error("Error parsing OpenAI response:", parseError);
+      throw new Error("Failed to parse the generated content. Please try again.");
+    }
+  } catch (error) {
+    console.error("Error generating content with OpenAI:", error);
+    throw new Error(error instanceof Error ? error.message : "Failed to generate content. Please try again.");
+  }
+}
+
+// Fallback mock function in case the API call fails or for testing
+export async function generateMockLandingContent(params: GenerationParams): Promise<GeneratedContent> {
   const { keywords, city, state } = params;
   
-  // Log what we would send to OpenAI
-  console.log("Generating content with params:", params);
+  console.log("Using MOCK content with params:", params);
   
   // This is where you would make the actual API call to OpenAI
   // For now, we'll simulate a delay and return mock data
@@ -54,70 +149,3 @@ export async function generateLandingContent(params: GenerationParams): Promise<
     ]
   };
 }
-
-// In a real implementation, you would add the API key and actual OpenAI API call:
-/*
-import OpenAI from 'openai';
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY || 'your-api-key-here',
-});
-
-export async function generateLandingContent(params: GenerationParams): Promise<GeneratedContent> {
-  const { keywords, city, state } = params;
-  
-  const prompt = `Create SEO-optimized landing page content for a local business in ${city}, ${state} focused on ${keywords.join(", ")}.
-  The content should be text-only and optimized for local SEO, with natural placement of location keywords and service keywords.
-  
-  Include the following sections:
-  1. Introduction (emphasize local service in ${city}, ${state})
-  2. Why Us section (highlight local expertise and benefits specific to ${city})
-  3. Things to do in ${city}, ${state} section (provide useful local information)
-  4. FAQ section (4 questions and answers, all with local relevance)
-  
-  For each section, naturally include:
-  - The main keyword "${keywords[0]}" multiple times
-  - Secondary keywords: ${keywords.slice(1).join(", ")}
-  - Location terms: "${city}", "${state}", and related local areas
-  - Natural variations of these terms
-  
-  Format the response as JSON with the following structure:
-  {
-    "introduction": "...",
-    "whyUs": "...",
-    "thingsToDo": "...",
-    "faq": [
-      {
-        "question": "...",
-        "answer": "..."
-      },
-      ...
-    ]
-  }`;
-  
-  try {
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o",
-      messages: [
-        {
-          role: "system",
-          content: "You are a local SEO expert specializing in creating compelling, location-specific landing page content that ranks well in local search results."
-        },
-        {
-          role: "user",
-          content: prompt
-        }
-      ],
-      temperature: 0.7,
-      response_format: { type: "json_object" }
-    });
-    
-    // Parse the response
-    const content = JSON.parse(response.choices[0].message.content || "{}");
-    return content as GeneratedContent;
-  } catch (error) {
-    console.error("Error generating content with OpenAI:", error);
-    throw new Error("Failed to generate content. Please try again.");
-  }
-}
-*/

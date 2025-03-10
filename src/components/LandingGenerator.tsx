@@ -5,6 +5,8 @@ import { Button } from './ui-custom/Button';
 import { Badge } from './ui-custom/Badge';
 import GeneratedLanding from './GeneratedLanding';
 import { downloadFile, generateTextFile, generateHtmlFile } from '@/utils/exportUtils';
+import ApiKeyInput from './ApiKeyInput';
+import { useToast } from '@/hooks/use-toast';
 
 interface KeywordBadgeProps {
   keyword: string;
@@ -32,9 +34,12 @@ const LandingGenerator = () => {
   const [keywords, setKeywords] = useState<string[]>([]);
   const [city, setCity] = useState('');
   const [state, setState] = useState('');
+  const [tone, setTone] = useState('professional');
+  const [isApiKeySet, setIsApiKeySet] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedContent, setGeneratedContent] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
+  const { toast } = useToast();
 
   const addKeyword = () => {
     if (keyword.trim() && !keywords.includes(keyword.trim())) {
@@ -55,6 +60,11 @@ const LandingGenerator = () => {
   };
 
   const handleGenerate = async () => {
+    if (!isApiKeySet) {
+      setError('Please set your OpenAI API key first.');
+      return;
+    }
+    
     if (keywords.length === 0) {
       setError('Please add at least one keyword.');
       return;
@@ -77,12 +87,23 @@ const LandingGenerator = () => {
       const content = await generateLandingContent({
         keywords,
         city,
-        state
+        state,
+        tone
       });
       
       setGeneratedContent(content);
+      toast({
+        title: "Content Generated",
+        description: "Your landing page content has been successfully generated.",
+      });
     } catch (err) {
-      setError('Failed to generate content. Please try again.');
+      const errorMessage = err instanceof Error ? err.message : 'Failed to generate content. Please try again.';
+      setError(errorMessage);
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive",
+      });
       console.error(err);
     } finally {
       setIsGenerating(false);
@@ -103,6 +124,11 @@ const LandingGenerator = () => {
     const textContent = generateTextFile(generatedContent, city, state, keywords);
     const filename = `${city}-${state}-${keywords[0]}.txt`.toLowerCase().replace(/\s+/g, '-');
     downloadFile(textContent, filename);
+    
+    toast({
+      title: "Downloaded",
+      description: "Text file has been downloaded successfully.",
+    });
   };
 
   const handleDownloadHTML = () => {
@@ -111,7 +137,20 @@ const LandingGenerator = () => {
     const htmlContent = generateHtmlFile(generatedContent, city, state, keywords);
     const filename = `${city}-${state}-${keywords[0]}.html`.toLowerCase().replace(/\s+/g, '-');
     downloadFile(htmlContent, filename);
+    
+    toast({
+      title: "Downloaded",
+      description: "HTML file has been downloaded successfully.",
+    });
   };
+
+  const toneOptions = [
+    { value: 'professional', label: 'Professional' },
+    { value: 'friendly', label: 'Friendly' },
+    { value: 'authoritative', label: 'Authoritative' },
+    { value: 'conversational', label: 'Conversational' },
+    { value: 'enthusiastic', label: 'Enthusiastic' }
+  ];
 
   return (
     <div className="w-full max-w-3xl mx-auto">
@@ -135,6 +174,8 @@ const LandingGenerator = () => {
         </div>
       ) : (
         <div className="space-y-8 animate-fade-in">
+          <ApiKeyInput onApiKeySet={setIsApiKeySet} />
+          
           <div className="space-y-2">
             <label className="block text-sm font-medium">
               Keywords <span className="text-xs text-foreground/60">(services, products, focus areas)</span>
@@ -199,6 +240,23 @@ const LandingGenerator = () => {
             </div>
           </div>
           
+          <div className="space-y-2">
+            <label className="block text-sm font-medium">
+              Content Tone
+            </label>
+            <select
+              value={tone}
+              onChange={(e) => setTone(e.target.value)}
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+            >
+              {toneOptions.map(option => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          
           {error && (
             <div className="text-sm text-red-500 animate-fade-in">
               {error}
@@ -211,6 +269,7 @@ const LandingGenerator = () => {
               isLoading={isGenerating}
               onClick={handleGenerate}
               className="transition-all duration-300"
+              disabled={!isApiKeySet}
             >
               {isGenerating ? 'Generating...' : 'Generate Landing Page'}
             </Button>
