@@ -1,5 +1,6 @@
-
 import React, { useState } from 'react';
+import { v4 as uuidv4 } from 'uuid';
+import { useNavigate, Link } from 'react-router-dom';
 import { generateLandingContent } from '@/services/openai';
 import { Button } from './ui-custom/Button';
 import { Badge } from './ui-custom/Badge';
@@ -7,6 +8,7 @@ import GeneratedLanding from './GeneratedLanding';
 import { downloadFile, generateTextFile, generateHtmlFile } from '@/utils/exportUtils';
 import ApiKeyInput from './ApiKeyInput';
 import { useToast } from '@/hooks/use-toast';
+import { useLandingPages } from '@/contexts/LandingPagesContext';
 
 interface KeywordBadgeProps {
   keyword: string;
@@ -40,6 +42,8 @@ const LandingGenerator = () => {
   const [generatedContent, setGeneratedContent] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
+  const navigate = useNavigate();
+  const { addLandingPage } = useLandingPages();
 
   const addKeyword = () => {
     if (keyword.trim() && !keywords.includes(keyword.trim())) {
@@ -144,6 +148,29 @@ const LandingGenerator = () => {
     });
   };
 
+  const handleSavePage = () => {
+    if (!generatedContent) return;
+    
+    const newPage = {
+      id: uuidv4(),
+      city,
+      state,
+      keywords,
+      tone,
+      createdAt: new Date(),
+      content: generatedContent
+    };
+    
+    addLandingPage(newPage);
+    
+    toast({
+      title: "Page Saved",
+      description: "Your landing page has been saved successfully.",
+    });
+    
+    navigate(`/view-page/${newPage.id}`);
+  };
+
   const toneOptions = [
     { value: 'professional', label: 'Professional' },
     { value: 'friendly', label: 'Friendly' },
@@ -167,6 +194,9 @@ const LandingGenerator = () => {
             <Button variant="outline" onClick={handleDownloadHTML}>
               Download as HTML
             </Button>
+            <Button onClick={handleSavePage}>
+              Save Page
+            </Button>
             <Button onClick={() => window.print()}>
               Save as PDF
             </Button>
@@ -174,6 +204,13 @@ const LandingGenerator = () => {
         </div>
       ) : (
         <div className="space-y-8 animate-fade-in">
+          <div className="flex justify-between items-center">
+            <h2 className="text-xl font-semibold">Generate New Landing Page</h2>
+            <Link to="/saved-pages">
+              <Button variant="outline" size="sm">Saved Pages</Button>
+            </Link>
+          </div>
+          
           <ApiKeyInput onApiKeySet={setIsApiKeySet} />
           
           <div className="space-y-2">
