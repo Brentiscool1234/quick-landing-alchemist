@@ -4,6 +4,7 @@ import { generateLandingContent } from '@/services/openai';
 import { Button } from './ui-custom/Button';
 import { Badge } from './ui-custom/Badge';
 import GeneratedLanding from './GeneratedLanding';
+import { downloadFile, generateTextFile, generateHtmlFile } from '@/utils/exportUtils';
 
 interface KeywordBadgeProps {
   keyword: string;
@@ -96,14 +97,36 @@ const LandingGenerator = () => {
     setError(null);
   };
 
+  const handleDownloadText = () => {
+    if (!generatedContent) return;
+    
+    const textContent = generateTextFile(generatedContent, city, state, keywords);
+    const filename = `${city}-${state}-${keywords[0]}.txt`.toLowerCase().replace(/\s+/g, '-');
+    downloadFile(textContent, filename);
+  };
+
+  const handleDownloadHTML = () => {
+    if (!generatedContent) return;
+    
+    const htmlContent = generateHtmlFile(generatedContent, city, state, keywords);
+    const filename = `${city}-${state}-${keywords[0]}.html`.toLowerCase().replace(/\s+/g, '-');
+    downloadFile(htmlContent, filename);
+  };
+
   return (
     <div className="w-full max-w-3xl mx-auto">
       {generatedContent ? (
         <div className="animate-fade-in">
           <GeneratedLanding content={generatedContent} city={city} state={state} keywords={keywords} />
-          <div className="mt-8 flex justify-center space-x-4">
+          <div className="mt-8 flex justify-center space-x-4 flex-wrap gap-4">
             <Button variant="outline" onClick={handleReset}>
               Create New
+            </Button>
+            <Button variant="outline" onClick={handleDownloadText}>
+              Download as Text
+            </Button>
+            <Button variant="outline" onClick={handleDownloadHTML}>
+              Download as HTML
             </Button>
             <Button onClick={() => window.print()}>
               Save as PDF
