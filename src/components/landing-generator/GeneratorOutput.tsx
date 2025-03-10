@@ -8,6 +8,7 @@ interface GeneratorOutputProps {
   city: string;
   state: string;
   keywords: string[];
+  companyName: string;
   onReset: () => void;
   onDownloadText: () => void;
   onDownloadHTML: () => void;
@@ -19,6 +20,7 @@ const GeneratorOutput: React.FC<GeneratorOutputProps> = ({
   city,
   state,
   keywords,
+  companyName,
   onReset,
   onDownloadText,
   onDownloadHTML,
@@ -26,7 +28,7 @@ const GeneratorOutput: React.FC<GeneratorOutputProps> = ({
 }) => {
   return (
     <div className="animate-fade-in">
-      <GeneratedLanding content={content} city={city} state={state} keywords={keywords} />
+      <GeneratedLanding content={content} city={city} state={state} keywords={keywords} companyName={companyName} />
       <div className="mt-8 flex justify-center space-x-4 flex-wrap gap-4">
         <Button variant="outline" onClick={onReset}>
           Create New
