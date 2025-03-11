@@ -38,23 +38,23 @@ export async function generateLandingContent(params: GenerationParams): Promise<
   
   const companyNamePrompt = companyName ? `for "${companyName}"` : 'for a local business';
   
-  const prompt = `Create detailed, comprehensive SEO-optimized landing page content ${companyNamePrompt} in ${city}, ${state} focused on ${keywords.join(", ")}.
-  The content should be very detailed, in-depth, and optimized for local SEO, with natural placement of location keywords and service keywords.
+  const prompt = `Create conversational, easy-to-read landing page content ${companyNamePrompt} in ${city}, ${state} focused on ${keywords.join(", ")}.
+  
+  Keep the content simple, friendly, and approachable. Avoid repetition, jargon, and fancy words. Use short paragraphs and everyday language that's easy to understand.
   
   Use a ${tone} tone throughout the content.
   
-  Include the following sections with extensive, detailed content (at least 300-500 words per section):
-  1. Introduction (emphasize local service in ${city}, ${state})
-  2. Why Us section (highlight ${companyName ? companyName + "'s" : "local"} expertise and benefits specific to ${city})
-  3. Things to do in ${city}, ${state} section (provide useful local information)
-  4. FAQ section (4 questions and answers, all with local relevance, with detailed answers of at least 150 words each)
+  Include the following sections:
+  1. Introduction (brief welcoming section about services in ${city}, ${state})
+  2. Why Us section (straightforward benefits of using ${companyName ? companyName : "our services"} in ${city})
+  3. Things to do in ${city}, ${state} section (helpful local information in a conversational style)
+  4. FAQ section (4 questions and answers with direct, simple responses)
   
   For each section, naturally include:
-  - The main keyword "${keywords[0]}" multiple times
+  - The main keyword "${keywords[0]}" 
   - Secondary keywords: ${keywords.slice(1).join(", ")}
-  - Location terms: "${city}", "${state}", and related local areas
-  - Natural variations of these terms
-  ${companyName ? `- The company name "${companyName}" where appropriate` : ''}
+  - Location terms: "${city}", "${state}"
+  ${companyName ? `- The company name "${companyName}" where it makes sense` : ''}
   
   Format the response as JSON with the following structure:
   {
@@ -82,7 +82,7 @@ export async function generateLandingContent(params: GenerationParams): Promise<
         messages: [
           {
             role: "system",
-            content: "You are a local SEO expert specializing in creating comprehensive, detailed, compelling, location-specific landing page content that ranks well in local search results. Produce very detailed content."
+            content: "You create conversational, easy-to-read content that sounds natural and friendly. Use simple language, short sentences, and avoid jargon or repetition."
           },
           {
             role: "user",

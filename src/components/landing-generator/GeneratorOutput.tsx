@@ -28,8 +28,10 @@ const GeneratorOutput: React.FC<GeneratorOutputProps> = ({
 }) => {
   return (
     <div className="animate-fade-in">
-      <GeneratedLanding content={content} city={city} state={state} keywords={keywords} companyName={companyName} />
-      <div className="mt-8 flex justify-center space-x-4 flex-wrap gap-4">
+      <div className="content-for-print">
+        <GeneratedLanding content={content} city={city} state={state} keywords={keywords} companyName={companyName} />
+      </div>
+      <div className="mt-8 flex justify-center space-x-4 flex-wrap gap-4 no-print">
         <Button variant="outline" onClick={onReset}>
           Create New
         </Button>
@@ -42,7 +44,9 @@ const GeneratorOutput: React.FC<GeneratorOutputProps> = ({
         <Button onClick={onSavePage}>
           Save Page
         </Button>
-        <Button onClick={() => window.print()}>
+        <Button onClick={() => {
+          window.print();
+        }}>
           Save as PDF
         </Button>
       </div>
